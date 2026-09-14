@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import CartesianPage from './pages/CartesianPage'
 import CylindricalPage from './pages/CylindricalPage'
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/spherique" element={<SphericalPage />} />
         </Routes>
       </div>
+      <Analytics />
     </BrowserRouter>
   )
 }
