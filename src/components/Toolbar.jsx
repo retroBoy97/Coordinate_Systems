@@ -34,7 +34,7 @@ function ToolButton({ active, disabled, onClick, title, children }) {
       title={title}
       onClick={onClick}
       className={
-        'flex items-center justify-center w-10 h-10 rounded-full transition-colors ' +
+        'flex items-center justify-center w-9 h-9 rounded-full transition-colors ' +
         (active
           ? 'bg-white text-black'
           : disabled
@@ -53,7 +53,7 @@ function PanelToggle({ active, onClick, children }) {
       type="button"
       onClick={onClick}
       className={
-        'px-4 py-1.5 text-sm rounded-full border backdrop-blur transition-colors whitespace-nowrap ' +
+        'h-11 flex items-center px-4 text-sm rounded-full border backdrop-blur transition-colors whitespace-nowrap ' +
         (active
           ? 'bg-white text-black border-white'
           : 'text-white border-white/15 bg-black/70 hover:bg-white/10')
@@ -95,7 +95,7 @@ export default function Toolbar({ coordinates = [] }) {
     <div className="pointer-events-none absolute top-4 left-1/2 -translate-x-1/2 flex items-start gap-3">
       {/* Tools column */}
       <div className="pointer-events-auto flex flex-col items-center gap-2">
-        <div className="flex items-center gap-1 bg-black/70 backdrop-blur border border-white/15 rounded-full px-1.5 py-1.5">
+        <div className="h-11 flex items-center gap-1 bg-black/70 backdrop-blur border border-white/15 rounded-full px-1.5">
           <ToolButton active={tool === 'hand'} onClick={() => setTool('hand')} title="Orbiter">
             <HandIcon />
           </ToolButton>

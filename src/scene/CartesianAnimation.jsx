@@ -20,8 +20,8 @@ const AXIS_DIR = {
 function LabelSpan({ text, color }) {
   return (
     <span
-      className="text-lg font-semibold bg-black/60 px-2 py-1 rounded whitespace-nowrap"
-      style={{ color }}
+      className="text-lg font-bold bg-black/90 px-2 py-1 rounded border whitespace-nowrap"
+      style={{ color, borderColor: color }}
     >
       {text}
     </span>

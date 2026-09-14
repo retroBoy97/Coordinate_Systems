@@ -68,7 +68,6 @@ function finalState(point, key) {
     const thetaPolar = r > 0 ? Math.acos(point.z / r) : 0
     const mDir = r > 0 ? new THREE.Vector3(point.x, point.y, point.z).normalize() : OZ_DIR
     const arcRadius = Math.max(0.3, Math.min(1, r * 0.85))
-    const p = mDir.clone().multiplyScalar(arcRadius + 0.35)
     const phi0 = Math.atan2(point.y, point.x)
     return {
       red: [],
@@ -79,7 +78,7 @@ function finalState(point, key) {
       arc: arcPoints(OZ_DIR, mDir, arcRadius, 1),
       meridian: r > 0 ? meridianCirclePoints(r, phi0) : null,
       markers: [],
-      label: { text: `θ = ${formatAngle(thetaPolar)}`, pos: { x: p.x, y: p.y, z: p.z }, color },
+      label: { text: `θ = ${formatAngle(thetaPolar)}`, pos: midpoint(O, point), color },
       color,
     }
   }
@@ -87,7 +86,6 @@ function finalState(point, key) {
   const phi = normalizedAngle(point.y, point.x)
   const P = { x: point.x, y: point.y, z: 0 }
   const arcRadius = Math.max(0.3, Math.min(1, Math.hypot(point.x, point.y) * 0.85))
-  const dir = new THREE.Vector3(Math.cos(phi), Math.sin(phi), 0).multiplyScalar(arcRadius + 0.35)
   return {
     red: [{ from: point, to: P, t: 1 }],
     purple: [
@@ -97,7 +95,7 @@ function finalState(point, key) {
     arc: azimuthalArcPoints(OX_DIR, OZ_AXIS, phi, arcRadius, 1),
     meridian: null,
     markers: [P],
-    label: { text: `φ = ${formatAngle(phi)}`, pos: { x: dir.x, y: dir.y, z: 0.3 }, color },
+    label: { text: `φ = ${formatAngle(phi)}`, pos: { ...midpoint(O, P), z: 0.3 }, color },
     color,
   }
 }
@@ -239,9 +237,8 @@ export default function SphericalAnimation() {
           duration: 0.8,
           onUpdate: () => setArc(arcPoints(OZ_DIR, mDir, arcRadius, arcProxy.p)),
           onComplete: () => {
-            const p = mDir.clone().multiplyScalar(arcRadius + 0.35)
             const text = `θ = ${formatAngle(thetaPolar)}`
-            setLabel({ text, pos: { x: p.x, y: p.y, z: p.z }, color })
+            setLabel({ text, pos: midpoint(O, point), color })
             setCoordinateLabel({ text, color })
           },
         },
@@ -276,10 +273,8 @@ export default function SphericalAnimation() {
           duration: 0.8,
           onUpdate: () => setArc(azimuthalArcPoints(OX_DIR, OZ_AXIS, phi, arcRadius, arcProxy.p)),
           onComplete: () => {
-            const dir = new THREE.Vector3(Math.cos(phi), Math.sin(phi), 0)
-            const pos = dir.multiplyScalar(arcRadius + 0.35)
             const text = `φ = ${formatAngle(phi)}`
-            setLabel({ text, pos: { x: pos.x, y: pos.y, z: 0.3 }, color })
+            setLabel({ text, pos: { ...midpoint(O, P), z: 0.3 }, color })
             setCoordinateLabel({ text, color })
           },
         },
@@ -546,8 +541,8 @@ export default function SphericalAnimation() {
       {label && (
         <Html position={toThree(label.pos)} center style={{ pointerEvents: 'none' }}>
           <span
-            className="text-lg font-semibold bg-black/60 px-2 py-1 rounded whitespace-nowrap"
-            style={{ color: label.color }}
+            className="text-lg font-bold bg-black/90 px-2 py-1 rounded border whitespace-nowrap"
+            style={{ color: label.color, borderColor: label.color }}
           >
             {label.text}
           </span>
@@ -556,8 +551,8 @@ export default function SphericalAnimation() {
       {uLabel && (
         <Html position={toThree(uLabel.pos)} center style={{ pointerEvents: 'none' }}>
           <span
-            className="text-lg font-semibold bg-black/60 px-2 py-1 rounded whitespace-nowrap"
-            style={{ color: uLabel.color }}
+            className="text-lg font-bold bg-black/90 px-2 py-1 rounded border whitespace-nowrap"
+            style={{ color: uLabel.color, borderColor: uLabel.color }}
           >
             {uLabel.text}
           </span>

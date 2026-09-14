@@ -33,36 +33,23 @@ function circlePoints(radius, y, segments = 64) {
 function finalState(point, key) {
   const O = { x: 0, y: 0, z: 0 }
   const P = { x: point.x, y: point.y, z: 0 }
+  const H = { x: 0, y: 0, z: point.z }
   const r = Math.hypot(point.x, point.y)
   const color = COLOR_FOR_KEY[key]
-  if (key === 'z') {
-    const H = { x: 0, y: 0, z: point.z }
+  if (key === 'z' || key === 'r') {
+    const text = key === 'z' ? `z = ${formatNumber(point.z)}` : `r = ${r.toFixed(2)}`
     return {
       red: [{ from: point, to: H, t: 1 }],
       purple: [],
       arc: null,
       markers: [H],
-      label: { text: `z = ${formatNumber(point.z)}`, pos: H, color },
-      color,
-    }
-  }
-  if (key === 'r') {
-    return {
-      red: [
-        { from: point, to: P, t: 1 },
-        { from: O, to: P, t: 1 },
-      ],
-      purple: [],
-      arc: null,
-      markers: [P],
-      label: { text: `r = ${r.toFixed(2)}`, pos: { ...midpoint(O, P), z: 0.35 }, color },
+      label: { text, pos: midpoint(point, H), color },
       color,
     }
   }
   // theta
   const theta = normalizedAngle(point.y, point.x)
   const arcRadius = Math.max(0.3, Math.min(1, r * 0.85))
-  const dir = new THREE.Vector3(Math.cos(theta), Math.sin(theta), 0).multiplyScalar(arcRadius + 0.35)
   return {
     red: [{ from: point, to: P, t: 1 }],
     purple: [
@@ -71,7 +58,7 @@ function finalState(point, key) {
     ],
     arc: azimuthalArcPoints(OX_DIR, OZ_AXIS, theta, arcRadius, 1),
     markers: [P],
-    label: { text: `θ = ${formatAngle(theta)}`, pos: { x: dir.x, y: dir.y, z: 0.3 }, color },
+    label: { text: `θ = ${formatAngle(theta)}`, pos: { ...midpoint(O, P), z: 0.35 }, color },
     color,
   }
 }
@@ -159,7 +146,8 @@ export default function CylindricalAnimation() {
     setGetColor(color)
     const tl = gsap.timeline()
 
-    if (activeCoordinate === 'z') {
+    if (activeCoordinate === 'z' || activeCoordinate === 'r') {
+      const text = activeCoordinate === 'z' ? `z = ${formatNumber(point.z)}` : `r = ${r.toFixed(2)}`
       const proxy = { t: 0 }
       tl.to(proxy, {
         t: 1,
@@ -167,27 +155,7 @@ export default function CylindricalAnimation() {
         onUpdate: () => setRedSegments([{ from: point, to: H, t: proxy.t }]),
         onComplete: () => {
           setMarkers([H])
-          const text = `z = ${formatNumber(point.z)}`
-          setLabel({ text, pos: H, color })
-          setCoordinateLabel({ text, color })
-        },
-      })
-    } else if (activeCoordinate === 'r') {
-      const dropProxy = { t: 0 }
-      tl.to(dropProxy, {
-        t: 1,
-        duration: 0.6,
-        onUpdate: () => setRedSegments([{ from: point, to: P, t: dropProxy.t }]),
-        onComplete: () => setMarkers([P]),
-      })
-      const radiusProxy = { t: 0 }
-      tl.to(radiusProxy, {
-        t: 1,
-        duration: 0.6,
-        onUpdate: () => setRedSegments((prev) => [prev[0], { from: O, to: P, t: radiusProxy.t }]),
-        onComplete: () => {
-          const text = `r = ${r.toFixed(2)}`
-          setLabel({ text, pos: { ...midpoint(O, P), z: 0.35 }, color })
+          setLabel({ text, pos: midpoint(point, H), color })
           setCoordinateLabel({ text, color })
         },
       })
@@ -220,10 +188,8 @@ export default function CylindricalAnimation() {
           duration: 0.8,
           onUpdate: () => setArc(azimuthalArcPoints(OX_DIR, OZ_AXIS, theta, arcRadius, arcProxy.p)),
           onComplete: () => {
-            const dir = new THREE.Vector3(Math.cos(theta), Math.sin(theta), 0)
-            const pos = dir.multiplyScalar(arcRadius + 0.35)
             const text = `θ = ${formatAngle(theta)}`
-            setLabel({ text, pos: { x: pos.x, y: pos.y, z: 0.3 }, color })
+            setLabel({ text, pos: { ...midpoint(O, P), z: 0.35 }, color })
             setCoordinateLabel({ text, color })
           },
         },
@@ -448,8 +414,8 @@ export default function CylindricalAnimation() {
       {label && (
         <Html position={toThree(label.pos)} center style={{ pointerEvents: 'none' }}>
           <span
-            className="text-lg font-semibold bg-black/60 px-2 py-1 rounded whitespace-nowrap"
-            style={{ color: label.color }}
+            className="text-lg font-bold bg-black/90 px-2 py-1 rounded border whitespace-nowrap"
+            style={{ color: label.color, borderColor: label.color }}
           >
             {label.text}
           </span>
@@ -458,8 +424,8 @@ export default function CylindricalAnimation() {
       {uLabel && (
         <Html position={toThree(uLabel.pos)} center style={{ pointerEvents: 'none' }}>
           <span
-            className="text-lg font-semibold bg-black/60 px-2 py-1 rounded whitespace-nowrap"
-            style={{ color: uLabel.color }}
+            className="text-lg font-bold bg-black/90 px-2 py-1 rounded border whitespace-nowrap"
+            style={{ color: uLabel.color, borderColor: uLabel.color }}
           >
             {uLabel.text}
           </span>
