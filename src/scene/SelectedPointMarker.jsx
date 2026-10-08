@@ -1,8 +1,10 @@
 import { toThree } from './coords'
 import { useSceneStore } from '../store/useSceneStore'
 
-export default function SelectedPointMarker() {
-  const point = useSceneStore((s) => s.point)
+// See PickableLattice.jsx / SceneCanvas.jsx: `store` defaults to the
+// coordinates-page store but can be swapped for another with the same shape.
+export default function SelectedPointMarker({ store = useSceneStore }) {
+  const point = store((s) => s.point)
   if (!point) return null
 
   return (

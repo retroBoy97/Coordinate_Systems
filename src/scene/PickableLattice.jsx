@@ -4,6 +4,9 @@ import * as THREE from 'three'
 import { useSceneStore } from '../store/useSceneStore'
 import { toThree, GRID_MAX } from './coords'
 
+// `store` defaults to the coordinates-page store but can be swapped (e.g. the
+// symmetry pages pass useSymmetryStore) — see SceneCanvas.jsx.
+
 // Max on-screen distance (px) from the cursor to a lattice point for it to be
 // pickable. Deliberately NOT implemented as a 3D raycast against a fixed
 // world-space hit-sphere per point: under perspective, a fixed world-space
@@ -18,10 +21,10 @@ const MAX_PICK_PX = 28
 // placement. The student rotates the camera (hand tool), then switches to
 // the select tool and clicks the point nearest the cursor on screen — only
 // that single nearest point renders as a hover preview, never a dot cloud.
-export default function PickableLattice() {
-  const tool = useSceneStore((s) => s.tool)
-  const point = useSceneStore((s) => s.point)
-  const setPoint = useSceneStore((s) => s.setPoint)
+export default function PickableLattice({ store = useSceneStore }) {
+  const tool = store((s) => s.tool)
+  const point = store((s) => s.point)
+  const setPoint = store((s) => s.setPoint)
   const { camera, size, gl } = useThree()
   const [hoverIndex, setHoverIndex] = useState(null)
 

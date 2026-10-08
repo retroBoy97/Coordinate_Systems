@@ -12,10 +12,10 @@ import SelectedPointMarker from './SelectedPointMarker'
 const INITIAL_POSITION = new THREE.Vector3(16, 13, 19)
 const INITIAL_TARGET = new THREE.Vector3(0, 0, 0)
 
-function Controls({ tool, orbitSuspended }) {
+function Controls({ tool, orbitSuspended, store }) {
   const controlsRef = useRef()
   const { camera } = useThree()
-  const cameraResetToken = useSceneStore((s) => s.cameraResetToken)
+  const cameraResetToken = store((s) => s.cameraResetToken)
 
   useEffect(() => {
     const controls = controlsRef.current
@@ -49,10 +49,15 @@ function Controls({ tool, orbitSuspended }) {
   )
 }
 
-export default function SceneCanvas({ children }) {
-  const tool = useSceneStore((s) => s.tool)
-  const activeUpdateKey = useSceneStore((s) => s.activeUpdateKey)
-  const orbitSuspended = useSceneStore((s) => s.orbitSuspended)
+// `store` lets this canvas (and the picking/marker it hosts) be reused by any
+// feature that needs "orbit + click a lattice point", not just the
+// coordinates pages — e.g. the symmetry pages pass useSymmetryStore instead.
+// Every store plugged in here must expose the same shape: tool, point,
+// setPoint, activeUpdateKey, orbitSuspended, cameraResetToken.
+export default function SceneCanvas({ children, store = useSceneStore }) {
+  const tool = store((s) => s.tool)
+  const activeUpdateKey = store((s) => s.activeUpdateKey)
+  const orbitSuspended = store((s) => s.orbitSuspended)
   const [pointerDown, setPointerDown] = useState(false)
 
   // Centralized cursor: 'grab'/'grabbing' whenever the user can drag
@@ -81,10 +86,10 @@ export default function SceneCanvas({ children }) {
       <color attach="background" args={['#000000']} />
       <AxesRepere />
       <FloorGrid />
-      <PickableLattice />
-      <SelectedPointMarker />
+      <PickableLattice store={store} />
+      <SelectedPointMarker store={store} />
       {children}
-      <Controls tool={tool} orbitSuspended={orbitSuspended} />
+      <Controls tool={tool} orbitSuspended={orbitSuspended} store={store} />
     </Canvas>
   )
 }
